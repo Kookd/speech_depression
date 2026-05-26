@@ -1,3 +1,4 @@
+
 # Whisper embeddings → 9 PHQ symptom predictor (nested CV, participant-level split)
 
 Trains a ReLU multi-layer perceptron (MLP) that predicts
@@ -5,6 +6,10 @@ Trains a ReLU multi-layer perceptron (MLP) that predicts
 evaluated with **nested cross-validation split at the participant level** so 
 there is no leakage. Produces a deployable inference model 
 (audio file → 9 predictions) plus evaluation plots and CSVs.
+
+## Results from Rotation
+
+[Rotation Results](https://kookd.github.io/speech_depression/)
 
 ---
 
