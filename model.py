@@ -8,14 +8,13 @@ pooling -> (saved) scaler -> MLP -> 9 symptom probabilities + binary calls.
 
 IMPORTANT — POOLING MUST MATCH TRAINING
 ---------------------------------------
-Your training CSV embeddings were "already pooled" upstream (in your feature-
+The training CSV embeddings were already mean-pooled upstream (in the feature-
 extraction step). The inference path below re-creates that pooling from raw
 audio. If the two disagree, inference will silently drift from training.
 
-The default here is MEAN-POOLING over the Whisper encoder's time frames, which
-is the most common choice. If your upstream pipeline used something else
-(max-pool, last hidden state, attention pooling), change ONLY the function
-`pool_encoder_states` below and everything downstream stays consistent.
+The default here is MEAN-POOLING over the Whisper encoder's time frames. 
+If the upstream pipeline used something else (max-pool, last hidden state, attention pooling), 
+change ONLY the function `pool_encoder_states` below and everything downstream stays consistent.
 """
 
 from __future__ import annotations
@@ -48,7 +47,7 @@ def pool_encoder_states(encoder_states: torch.Tensor) -> torch.Tensor:
 #  TRAINING CHAIN for denoised models (confirmed):
 #      load_audio (16k mono) -> pad/trim to 30s @ 16k -> denoise(dns64)
 #      -> log_mel -> encoder -> mean-pool
-#  The denoise step happens AFTER pad/trim, so we replicate that order in
+#  The denoise step happens AFTER pad/trim, so that order is replicated in
 #  embed_audio below. The model is a module-level singleton so it loads once.
 #
 #  NOTE: dns64 weights download from the internet on first use. On an offline
@@ -138,8 +137,8 @@ class InferencePipeline:
       * predict_from_embedding(vec)  -> for a pre-pooled 512-d vector
       * predict_from_audio(path)     -> raw audio file, runs Whisper encoder
 
-    Whisper is imported lazily so this object also works on machines where you
-    only ever feed it embeddings.
+    Whisper is imported lazily so this object also works on machines where only
+    embeddings are used.
     """
 
     def __init__(
