@@ -1,0 +1,17 @@
+name: speech_depression
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - pytorch
+  - ffmpeg
+  - pytorch-cuda   # match the CUDA your cluster's GPU partition provides
+  - pip:
+      - openai-whisper   # only needed for the audio->embedding inference path

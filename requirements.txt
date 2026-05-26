@@ -1,0 +1,8 @@
+# Fallback if you prefer pip over conda. For GPU, install the torch build that
+# matches your cluster's CUDA from https://pytorch.org/get-started/locally/
+numpy
+pandas
+scikit-learn
+matplotlib
+torch
+openai-whisper   # only for the audio->embedding inference path
