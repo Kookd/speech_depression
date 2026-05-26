@@ -1,0 +1,16 @@
+.highlight {
+  background-color: #fff3a3;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.highlight2 {
+  background-color: #fb96c2;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+body {
+  font-size: 18px;
+  line-height: 1.6;
+}
