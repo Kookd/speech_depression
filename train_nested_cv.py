@@ -1,7 +1,7 @@
 """
 train_nested_cv.py
 ==================
-Nested cross-validation, split at the PARTICIPANT level, to train and honestly
+Nested cross-validation, split at the PARTICIPANT level, to train and
 evaluate a ReLU MLP that predicts 9 binary depression symptoms from pooled
 Whisper embeddings.
 
@@ -78,7 +78,7 @@ def set_seed(seed: int) -> None:
 # --------------------------------------------------------------------------- #
 #  Display names + filename slugs
 #
-#  The SLURM script passes the REAL csv column names (e.g. PHQ.1_f27). We parse
+#  The SLURM script passes the REAL csv column names (e.g. PHQ.1_f27). I parse
 #  the PHQ item number + dichotomization version out of each column and build a
 #  clean human-readable label for plot titles and CSVs, and a filesystem-safe
 #  slug for plot filenames.
@@ -135,7 +135,7 @@ def load_data(
 ):
     """Join features + labels on filename, return X, Y, groups, names.
 
-    features_csv : cols [filename, path, emb_0 ... emb_511]
+    features_csv : cols [filename, emb_0 ... emb_511]
     labels_csv   : must contain filename_col, participant_col, and symptom_cols
     """
     feats = pd.read_csv(features_csv)
@@ -166,7 +166,7 @@ def load_data(
     Y = merged[symptom_cols].to_numpy(dtype=np.float32)
     groups = merged[participant_col].to_numpy()
 
-    # --- GUARD: labels must be binary {0,1} ---
+    # --- CHECK: labels must be binary {0,1} ---
     uniq = np.unique(Y[~np.isnan(Y)])
     if not np.all(np.isin(uniq, [0.0, 1.0])):
         raise ValueError(
@@ -293,7 +293,7 @@ def train_one(
 
 
 # --------------------------------------------------------------------------- #
-#  Metrics helpers that degrade gracefully when a fold has no positives
+#  Metrics helpers that degrade when a fold has no positives
 # --------------------------------------------------------------------------- #
 def safe_auroc(y_true, y_prob):
     if len(np.unique(y_true)) < 2:
@@ -372,7 +372,7 @@ def main():
     ))
 
     # Stratify on a single representative label so folds keep some balance.
-    # We use the most prevalent symptom as the stratification target; group
+    # I use the most prevalent symptom as the stratification target; group
     # constraint (participant) always takes precedence over stratification.
     strat_target = Y[:, int(np.argmax(Y.sum(axis=0)))].astype(int)
 
