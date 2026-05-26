@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="David Kook">
+<meta name="dcterms.date" content="2026-05-26">
+
+<title>Depression Symptom Prediction using Speech</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="final_files/libs/clipboard/clipboard.min.js"></script>
+<script src="final_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="final_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="final_files/libs/quarto-html/popper.min.js"></script>
+<script src="final_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="final_files/libs/quarto-html/anchor.min.js"></script>
+<link href="final_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="final_files/libs/quarto-html/quarto-syntax-highlighting-7c69b197886ae2a34062761d21e44731.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="final_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="final_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="final_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="final_files/libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="final_files/libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="final_files/libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script src="final_files/libs/core-js-2.5.3/shim.min.js"></script>
+<script src="final_files/libs/react-18.2.0/react.min.js"></script>
+<script src="final_files/libs/react-18.2.0/react-dom.min.js"></script>
+<script src="final_files/libs/reactwidget-2.0.0/react-tools.js"></script>
+<link href="final_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="final_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="final_files/libs/reactable-0.4.4/reactable.css" rel="stylesheet">
+<script src="final_files/libs/reactable-binding-0.4.4/reactable.js"></script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#goal" id="toc-goal" class="nav-link" data-scroll-target="#goal">Goal</a></li>
+  </ul></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
+  <ul class="collapse">
+  <li><a href="#results-summary" id="toc-results-summary" class="nav-link" data-scroll-target="#results-summary">Results Summary</a></li>
+  </ul></li>
+  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
+  <li><a href="#demonstration" id="toc-demonstration" class="nav-link" data-scroll-target="#demonstration">Demonstration</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Depression Symptom Prediction using Speech</h1>
+<p class="subtitle lead">Jacobson Lab - Spring Rotation</p>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-left">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>David Kook </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 26, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<section id="motivation" class="level2">
+<h2 class="anchored" data-anchor-id="motivation">Motivation</h2>
+<ul>
+<li>Speech is a core component in how we interact with each other and our environment.</li>
+<li>Speech can be collected passively, through smartphones, smart speakers, and even home appliances.</li>
+<li>Speech is the result of complex biophysical interactions between the neurological, vocal, and respiratory systems.
+<ul>
+<li>Changes in any of these systems can lead to how we speak and sound.</li>
+</ul></li>
+<li>Major depressive disorder (MDD) is a common mental health illness with multifactorial etiology, which ranges from biological to socio-environmental causes.
+<ul>
+<li>Diagnosis of MDD and assessment of symptoms relies on subjective self-report, which is a source of information bias.</li>
+<li>There is evidence that linguistic (e.g.&nbsp;emotional intensity) and acoustic features (e.g.&nbsp;pitch, speed) of speech have potential to be objective biomarkers of depression.</li>
+</ul></li>
+<li>However, current research focuses on using speech to predict overall depression severity and not individual symptoms, which is more clinically informative and lays foundations for personalized treatments.</li>
+</ul>
+</section>
+<section id="goal" class="level2">
+<h2 class="anchored" data-anchor-id="goal">Goal</h2>
+<p><strong><em>Use speech to predict individual depression symptoms.</em></strong></p>
+</section>
+</section>
+<section id="methods" class="level1">
+<h1>Methods</h1>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Click to expand">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Click to expand
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<ul>
+<li>The Tracking Depression Study</li>
+<li>Audio-only and video diaries from ecological momentary assessments that were administered 3/day for 90 days
+<ul>
+<li>9 symptoms assessed: anhedonia, depressed mood, sleep problems, fatigue, appetite changes, feelings of worthlessness, concentration problems, psychomotor changes, suicidality</li>
+</ul></li>
+<li>Final analysis included 57 participants with 862 recordings used for analysis</li>
+</ul>
+</section>
+<section id="pre-processing" class="level2">
+<h2 class="anchored" data-anchor-id="pre-processing">Pre-processing</h2>
+<ul>
+<li>Determining sample size for modeling <img src="./flowchart.png" class="img-fluid quarto-figure quarto-figure-center" style="width:70.0%"></li>
+<li><span class="highlight2">Depression symptoms (labels) preprocessing</span>
+<ul>
+<li>Originally on 0 - 100 slider scale</li>
+<li>Dichotomized to 0 (symptom absent) and 1 (symptom present) using three threholds: 26827, 26837, and 26850
+<ul>
+<li>50 = to create balanced classes</li>
+<li>27/37 = one of these were the average symptom severity in previous work that showed good separation between severe and non-severe symptoms</li>
+</ul></li>
+<li>One symptom, trouble sleeping, was asked in the morning only so if a recording was from the afternoon or evening, the label would be missing not at random. To resolve these edge cases, I imputed their missing label in a two-step process:
+<ul>
+<li>If the subject submitted a morning EMA with all questions answered, I imputed the afternoon and evening EMAs with the same label as the morning EMA.</li>
+<li>If the subject did not submit a morning EMA or if the morning EMA had missing values, I took the average of the closest available day before and after with available data to impute the label.
+<ul>
+<li>Why? Sleep problems are chronic and don’t fluctuate significantly throughout the day or between days. Sleep issues are not resolved overnight.</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><span class="highlight2">Speech preprocessing (CPU only)</span>
+<ul>
+<li>Extract audio from video diaries and convert extracted audio and audio-only diaries to .wav format.</li>
+<li>Resample audio to 16kHz and pad or trim audio to 30 seconds.</li>
+<li>For later ablation study, denoise audio using Meta’s audio denoiser model (removes background and isolates speaker voice even with multiple speakers).</li>
+<li>Extract speech embeddings using OpenAI’s base Whisper model to a .csv of n x 512 embeddings. Whisper is is a general-purpose model originally trained for speech recognition and transcription.
+<ul>
+<li>This model was selected based on the amount of data that it was trained on compared to other models like openSMILE.</li>
+</ul></li>
+<li>Mean-pool the embeddings across the recording’s time dimension to get a single 512-dimensional vector representation of each audio.</li>
+</ul></li>
+<li><span class="highlight2">Training and evaluation (GPU only)</span>
+<ul>
+<li>Multi-layer feed-forward neural network with 2 hidden layers, ReLU activation, and dropout.
+<ul>
+<li>Cost function: BCEWithLogitLoss (combines sigmoid activation with binary cross-entropy loss to catch extreme values)</li>
+<li>Adam optimizer for learning rate with linear warm-up and cosine annealing scheduler</li>
+<li>Early stopping with patience set at 10 epochs to prevent overfitting</li>
+</ul></li>
+<li>5-fold nested cross validation split at the participant level to prevent data leakage using StratifiedGroupKFold.
+<ul>
+<li>Outer loop - 5 folds (~20% of participants), inner loop - 4 folds:
+<ul>
+<li>Within each fold, hyperparameters are validated and their scores averaged then ranked. Hyperparameter configuration with highest average score is tested on outer fold. Repeated for each outer fold.</li>
+<li>Configs from inner fold then re-trained on outer fold train hold-out and validated on outer test hold-out.</li>
+<li>Majority vote across 5 outer folds to obtain final model hyperparameters for later inference or deployment.</li>
+</ul></li>
+<li>Hyperparameter grid search (8 combinations):
+<ul>
+<li>Hidden layers - [(128, 64), (256, 64)]</li>
+<li>Dropout - [0.3, 0.5]<br>
+</li>
+<li>Learning rate - [1e-3, 3e-4]<br>
+</li>
+<li>Weight decay - [1e-4]</li>
+</ul></li>
+</ul></li>
+<li>Trained for 100 epochs with warmup of 5 epochs</li>
+<li>Model evaluation:
+<ul>
+<li>Primary metric: Symptom-specific AUROC</li>
+<li>Secondary metrics: Symptom-specific F1, precision, and recall</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+</div>
+</div>
+</div>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<div class="callout callout-style-simple callout-note no-icon">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-body-container">
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Participant Demographics
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output-display">
+<div id="lssdmozgcw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#lssdmozgcw table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#lssdmozgcw thead, #lssdmozgcw tbody, #lssdmozgcw tfoot, #lssdmozgcw tr, #lssdmozgcw td, #lssdmozgcw th {
+  border-style: none;
+}
+
+#lssdmozgcw p {
+  margin: 0;
+  padding: 0;
+}
+
+#lssdmozgcw .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#lssdmozgcw .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#lssdmozgcw .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#lssdmozgcw .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#lssdmozgcw .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#lssdmozgcw .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#lssdmozgcw .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#lssdmozgcw .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#lssdmozgcw .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#lssdmozgcw .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#lssdmozgcw .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#lssdmozgcw .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#lssdmozgcw .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#lssdmozgcw .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#lssdmozgcw .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#lssdmozgcw .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#lssdmozgcw .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#lssdmozgcw .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#lssdmozgcw .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#lssdmozgcw .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#lssdmozgcw .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#lssdmozgcw .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#lssdmozgcw .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#lssdmozgcw .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#lssdmozgcw .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#lssdmozgcw .gt_left {
+  text-align: left;
+}
+
+#lssdmozgcw .gt_center {
+  text-align: center;
+}
+
+#lssdmozgcw .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#lssdmozgcw .gt_font_normal {
+  font-weight: normal;
+}
+
+#lssdmozgcw .gt_font_bold {
+  font-weight: bold;
+}
+
+#lssdmozgcw .gt_font_italic {
+  font-style: italic;
+}
+
+#lssdmozgcw .gt_super {
+  font-size: 65%;
+}
+
+#lssdmozgcw .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#lssdmozgcw .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#lssdmozgcw .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#lssdmozgcw .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#lssdmozgcw .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#lssdmozgcw .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#lssdmozgcw .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#lssdmozgcw .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#lssdmozgcw div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="gt_heading header">
+<td colspan="2" class="gt_heading gt_title gt_font_normal gt_bottom_border"><strong>Participant Demographics</strong></td>
+</tr>
+<tr class="gt_col_headings even">
+<th id="label" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"><strong>Characteristic</strong></th>
+<th id="stat_0" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>N = 57</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span></th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="label" style="font-weight: bold">Age at Study Start (yrs)</td>
+<td class="gt_row gt_center" headers="stat_0">41 (12)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label" style="font-weight: bold">Currently in college</td>
+<td class="gt_row gt_center" headers="stat_0"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;No</td>
+<td class="gt_row gt_center" headers="stat_0">44 (77%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Yes, Full-time</td>
+<td class="gt_row gt_center" headers="stat_0">12 (21%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Yes, Part-time</td>
+<td class="gt_row gt_center" headers="stat_0">1 (1.8%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label" style="font-weight: bold">Gender</td>
+<td class="gt_row gt_center" headers="stat_0"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td class="gt_row gt_center" headers="stat_0">0 (0%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Female</td>
+<td class="gt_row gt_center" headers="stat_0">50 (88%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Male</td>
+<td class="gt_row gt_center" headers="stat_0">4 (7.0%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Non-Binary</td>
+<td class="gt_row gt_center" headers="stat_0">1 (1.8%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Other (Prefer To Self-Describe)</td>
+<td class="gt_row gt_center" headers="stat_0">2 (3.5%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label" style="font-weight: bold">Highest Level of Education</td>
+<td class="gt_row gt_center" headers="stat_0"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Associate degree in college (2-year)</td>
+<td class="gt_row gt_center" headers="stat_0">6 (11%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Bachelor's degree in college (4-year)</td>
+<td class="gt_row gt_center" headers="stat_0">18 (32%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Doctoral degree (for example, PhD, MD, JD, etc.)</td>
+<td class="gt_row gt_center" headers="stat_0">2 (3.5%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;High school graduate (high school diploma or equivalent including GED)</td>
+<td class="gt_row gt_center" headers="stat_0">4 (7.0%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Master's degree</td>
+<td class="gt_row gt_center" headers="stat_0">17 (30%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Some college, but no degree</td>
+<td class="gt_row gt_center" headers="stat_0">9 (16%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Trade/Technical School degree (for example, electrician, nurse, chef, etc.)</td>
+<td class="gt_row gt_center" headers="stat_0">1 (1.8%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label" style="font-weight: bold">Hispanic/Latino</td>
+<td class="gt_row gt_center" headers="stat_0"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;None of these</td>
+<td class="gt_row gt_center" headers="stat_0">49 (86%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Yes</td>
+<td class="gt_row gt_center" headers="stat_0">8 (14%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label" style="font-weight: bold">Race</td>
+<td class="gt_row gt_center" headers="stat_0"><br>
+</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;American Indian or Alaska Native</td>
+<td class="gt_row gt_center" headers="stat_0">1 (1.8%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Asian</td>
+<td class="gt_row gt_center" headers="stat_0">2 (3.5%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Black or African American</td>
+<td class="gt_row gt_center" headers="stat_0">7 (12%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Multiple</td>
+<td class="gt_row gt_center" headers="stat_0">7 (12%)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Other</td>
+<td class="gt_row gt_center" headers="stat_0">3 (5.3%)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;White</td>
+<td class="gt_row gt_center" headers="stat_0">37 (65%)</td>
+</tr>
+</tbody><tfoot>
+<tr class="gt_footnotes odd">
+<td colspan="2" class="gt_footnote"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;line-height:0;"><sup>1</sup></span> Mean (SD); n (%)</td>
+</tr>
+<tr class="gt_sourcenotes even">
+<td colspan="2" class="gt_sourcenote">Continuous variables are presented as Mean (SD); categorical variables are presented as n (%).</td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Participant Distribution of Depression Symptoms
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output-display">
+<div id="yyaizdswoa" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#yyaizdswoa table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#yyaizdswoa thead, #yyaizdswoa tbody, #yyaizdswoa tfoot, #yyaizdswoa tr, #yyaizdswoa td, #yyaizdswoa th {
+  border-style: none;
+}
+
+#yyaizdswoa p {
+  margin: 0;
+  padding: 0;
+}
+
+#yyaizdswoa .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#yyaizdswoa .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#yyaizdswoa .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#yyaizdswoa .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#yyaizdswoa .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#yyaizdswoa .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#yyaizdswoa .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#yyaizdswoa .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#yyaizdswoa .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#yyaizdswoa .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#yyaizdswoa .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#yyaizdswoa .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#yyaizdswoa .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#yyaizdswoa .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#yyaizdswoa .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yyaizdswoa .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#yyaizdswoa .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#yyaizdswoa .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#yyaizdswoa .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yyaizdswoa .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#yyaizdswoa .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yyaizdswoa .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#yyaizdswoa .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yyaizdswoa .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#yyaizdswoa .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yyaizdswoa .gt_left {
+  text-align: left;
+}
+
+#yyaizdswoa .gt_center {
+  text-align: center;
+}
+
+#yyaizdswoa .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#yyaizdswoa .gt_font_normal {
+  font-weight: normal;
+}
+
+#yyaizdswoa .gt_font_bold {
+  font-weight: bold;
+}
+
+#yyaizdswoa .gt_font_italic {
+  font-style: italic;
+}
+
+#yyaizdswoa .gt_super {
+  font-size: 65%;
+}
+
+#yyaizdswoa .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#yyaizdswoa .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#yyaizdswoa .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#yyaizdswoa .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#yyaizdswoa .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#yyaizdswoa .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#yyaizdswoa .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#yyaizdswoa .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#yyaizdswoa div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<td colspan="3" class="gt_heading gt_title gt_font_normal gt_bottom_border"><strong>Depression Symptoms by Timepoint and Threshold</strong></td>
+</tr>
+<tr class="gt_col_headings even">
+<th id="a::stub" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Threshold</th>
+<th id="Baseline" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Baseline</th>
+<th id="Overall" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Overall</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Anhedonia" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Anhedonia</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_1" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Anhedonia stub_1_1 Baseline">No: 24 (34.3%); Yes: 46 (65.7%)</td>
+<td class="gt_row gt_left" headers="Anhedonia stub_1_1 Overall">No: 12 (21.1%); Yes: 45 (78.9%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_2" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Anhedonia stub_1_2 Baseline">No: 33 (45.8%); Yes: 39 (54.2%)</td>
+<td class="gt_row gt_left" headers="Anhedonia stub_1_2 Overall">No: 18 (31.6%); Yes: 39 (68.4%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_3" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Anhedonia stub_1_3 Baseline">No: 42 (53.8%); Yes: 36 (46.2%)</td>
+<td class="gt_row gt_left" headers="Anhedonia stub_1_3 Overall">No: 22 (38.6%); Yes: 35 (61.4%)</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Appetite changes" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Appetite changes</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_4" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Appetite changes stub_1_4 Baseline">No: 31 (41.3%); Yes: 44 (58.7%)</td>
+<td class="gt_row gt_left" headers="Appetite changes stub_1_4 Overall">No: 23 (40.4%); Yes: 34 (59.6%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_5" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Appetite changes stub_1_5 Baseline">No: 36 (46.8%); Yes: 41 (53.2%)</td>
+<td class="gt_row gt_left" headers="Appetite changes stub_1_5 Overall">No: 28 (49.1%); Yes: 29 (50.9%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_6" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Appetite changes stub_1_6 Baseline">No: 44 (53.0%); Yes: 39 (47.0%)</td>
+<td class="gt_row gt_left" headers="Appetite changes stub_1_6 Overall">No: 30 (52.6%); Yes: 27 (47.4%)</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Concentration" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Concentration</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_7" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Concentration stub_1_7 Baseline">No: 16 (22.5%); Yes: 55 (77.5%)</td>
+<td class="gt_row gt_left" headers="Concentration stub_1_7 Overall">No: 14 (24.6%); Yes: 43 (75.4%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_8" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Concentration stub_1_8 Baseline">No: 22 (29.3%); Yes: 53 (70.7%)</td>
+<td class="gt_row gt_left" headers="Concentration stub_1_8 Overall">No: 20 (35.1%); Yes: 37 (64.9%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_9" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Concentration stub_1_9 Baseline">No: 28 (35.9%); Yes: 50 (64.1%)</td>
+<td class="gt_row gt_left" headers="Concentration stub_1_9 Overall">No: 21 (36.8%); Yes: 36 (63.2%)</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Depressed mood" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Depressed mood</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_10" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Depressed mood stub_1_10 Baseline">No: 25 (34.2%); Yes: 48 (65.8%)</td>
+<td class="gt_row gt_left" headers="Depressed mood stub_1_10 Overall">No: 12 (21.1%); Yes: 45 (78.9%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_11" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Depressed mood stub_1_11 Baseline">No: 33 (42.3%); Yes: 45 (57.7%)</td>
+<td class="gt_row gt_left" headers="Depressed mood stub_1_11 Overall">No: 20 (35.1%); Yes: 37 (64.9%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_12" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Depressed mood stub_1_12 Baseline">No: 42 (52.5%); Yes: 38 (47.5%)</td>
+<td class="gt_row gt_left" headers="Depressed mood stub_1_12 Overall">No: 28 (49.1%); Yes: 29 (50.9%)</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Fatigue" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Fatigue</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_13" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Fatigue stub_1_13 Baseline">No: 12 (18.5%); Yes: 53 (81.5%)</td>
+<td class="gt_row gt_left" headers="Fatigue stub_1_13 Overall">No: 9 (15.8%); Yes: 48 (84.2%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_14" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Fatigue stub_1_14 Baseline">No: 18 (25.7%); Yes: 52 (74.3%)</td>
+<td class="gt_row gt_left" headers="Fatigue stub_1_14 Overall">No: 13 (22.8%); Yes: 44 (77.2%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_15" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Fatigue stub_1_15 Baseline">No: 26 (34.2%); Yes: 50 (65.8%)</td>
+<td class="gt_row gt_left" headers="Fatigue stub_1_15 Overall">No: 17 (29.8%); Yes: 40 (70.2%)</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Psychomotor" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Psychomotor</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_16" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Psychomotor stub_1_16 Baseline">No: 35 (49.3%); Yes: 36 (50.7%)</td>
+<td class="gt_row gt_left" headers="Psychomotor stub_1_16 Overall">No: 33 (57.9%); Yes: 24 (42.1%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_17" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Psychomotor stub_1_17 Baseline">No: 46 (59.0%); Yes: 32 (41.0%)</td>
+<td class="gt_row gt_left" headers="Psychomotor stub_1_17 Overall">No: 39 (68.4%); Yes: 18 (31.6%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_18" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Psychomotor stub_1_18 Baseline">No: 51 (64.6%); Yes: 28 (35.4%)</td>
+<td class="gt_row gt_left" headers="Psychomotor stub_1_18 Overall">No: 42 (73.7%); Yes: 15 (26.3%)</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Sleep disturbance" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Sleep disturbance</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_19" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Sleep disturbance stub_1_19 Baseline">No: 15 (25.9%); Yes: 43 (74.1%)</td>
+<td class="gt_row gt_left" headers="Sleep disturbance stub_1_19 Overall">No: 16 (28.1%); Yes: 41 (71.9%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_20" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Sleep disturbance stub_1_20 Baseline">No: 21 (36.2%); Yes: 37 (63.8%)</td>
+<td class="gt_row gt_left" headers="Sleep disturbance stub_1_20 Overall">No: 22 (38.6%); Yes: 35 (61.4%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_21" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Sleep disturbance stub_1_21 Baseline">No: 25 (41.7%); Yes: 35 (58.3%)</td>
+<td class="gt_row gt_left" headers="Sleep disturbance stub_1_21 Overall">No: 26 (45.6%); Yes: 31 (54.4%)</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Suicidality" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Suicidality</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_22" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Suicidality stub_1_22 Baseline">No: 52 (81.2%); Yes: 12 (18.8%)</td>
+<td class="gt_row gt_left" headers="Suicidality stub_1_22 Overall">No: 52 (91.2%); Yes: 5 (8.8%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_23" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Suicidality stub_1_23 Baseline">No: 55 (87.3%); Yes: 8 (12.7%)</td>
+<td class="gt_row gt_left" headers="Suicidality stub_1_23 Overall">No: 55 (96.5%); Yes: 2 (3.5%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_24" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Suicidality stub_1_24 Baseline">No: 56 (90.3%); Yes: 6 (9.7%)</td>
+<td class="gt_row gt_left" headers="Suicidality stub_1_24 Overall">No: 55 (96.5%); Yes: 2 (3.5%)</td>
+</tr>
+<tr class="gt_group_heading_row odd">
+<th colspan="3" id="Worthlessness" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Worthlessness</th>
+</tr>
+<tr class="gt_row_group_first even">
+<th id="stub_1_25" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥27</th>
+<td class="gt_row gt_left" headers="Worthlessness stub_1_25 Baseline">No: 24 (33.8%); Yes: 47 (66.2%)</td>
+<td class="gt_row gt_left" headers="Worthlessness stub_1_25 Overall">No: 14 (24.6%); Yes: 43 (75.4%)</td>
+</tr>
+<tr class="odd">
+<th id="stub_1_26" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥37</th>
+<td class="gt_row gt_left" headers="Worthlessness stub_1_26 Baseline">No: 31 (40.3%); Yes: 46 (59.7%)</td>
+<td class="gt_row gt_left" headers="Worthlessness stub_1_26 Overall">No: 19 (33.3%); Yes: 38 (66.7%)</td>
+</tr>
+<tr class="even">
+<th id="stub_1_27" class="gt_row gt_left gt_stub" data-quarto-table-cell-role="th" scope="row">≥50</th>
+<td class="gt_row gt_left" headers="Worthlessness stub_1_27 Baseline">No: 37 (46.8%); Yes: 42 (53.2%)</td>
+<td class="gt_row gt_left" headers="Worthlessness stub_1_27 Overall">No: 22 (38.6%); Yes: 35 (61.4%)</td>
+</tr>
+</tbody><tfoot>
+<tr class="gt_sourcenotes odd">
+<td colspan="3" class="gt_sourcenote">Values are presented as <strong>No: n (%)</strong> and <strong>Yes: n (%)</strong>.</td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Model Metrics
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<section id="plots" class="level3">
+<h3 class="anchored" data-anchor-id="plots">Plots</h3>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Confusion — original
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="./final_plots/confusion_grid_original.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Confusion — original"><img src="./final_plots/confusion_grid_original.png" class="img-fluid figure-img" alt="Confusion — original"></a></p>
+<figcaption>Confusion — original</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Confusion — denoised
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="./final_plots/confusion_grid_denoised.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Confusion — denoised"><img src="./final_plots/confusion_grid_denoised.png" class="img-fluid figure-img" alt="Confusion — denoised"></a></p>
+<figcaption>Confusion — denoised</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>AUROC/Learning Rate - original
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="./final_plots/metric_grid_original.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="AUROC/Learning Rate - original"><img src="./final_plots/metric_grid_original.png" class="img-fluid figure-img" alt="AUROC/Learning Rate - original"></a></p>
+<figcaption>AUROC/Learning Rate - original</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>AUROC/Learning Rate - denoised
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="./final_plots/metric_grid_denoised.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="AUROC/Learning Rate - denoised"><img src="./final_plots/metric_grid_denoised.png" class="img-fluid figure-img" alt="AUROC/Learning Rate - denoised"></a></p>
+<figcaption>AUROC/Learning Rate - denoised</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Loss curves — original
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="./final_plots/loss_curve_grid_original.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Loss curves — original"><img src="./final_plots/loss_curve_grid_original.png" class="img-fluid figure-img" alt="Loss curves — original"></a></p>
+<figcaption>Loss curves — original</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Loss curves — denoised
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="./final_plots/loss_curve_grid_denoised.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Loss curves — denoised"><img src="./final_plots/loss_curve_grid_denoised.png" class="img-fluid figure-img" alt="Loss curves — denoised"></a></p>
+<figcaption>Loss curves — denoised</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="tables" class="level3">
+<h3 class="anchored" data-anchor-id="tables">Tables</h3>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Predictive Metrics
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output-display">
+<div class="reactable html-widget html-fill-item" id="htmlwidget-be9e612bc976105e48bd" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-be9e612bc976105e48bd">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"arm":["denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original"],"threshold":["27","27","27","27","27","27","27","27","27","37","37","37","37","37","37","37","37","37","50","50","50","50","50","50","50","50","50","27","27","27","27","27","27","27","27","27","37","37","37","37","37","37","37","37","37","50","50","50","50","50","50","50","50","50"],"symptom":["Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness"],"auroc_mean":[0.483317826842791,0.543735108056787,0.422799533809091,0.576339964861397,0.406175776391478,0.536481880891455,0.531696953389777,0.365102646656768,0.435566982587108,0.593592244312532,0.567676883678924,0.58911844620226,0.582874723653547,0.541206185519677,0.477288149764679,0.404559993712751,0.477068865754971,0.439483170645984,0.530553144036,0.495829344180785,0.461576156592619,0.481322124751194,0.542825814186759,0.567740627435294,0.483798973851013,0.629626184626185,0.488140260803664,0.518990824386998,0.568410664982621,0.405470425455437,0.614334059339279,0.46332984862132,0.547107634754435,0.521448503560439,0.321144069430964,0.443571639877706,0.601565755150194,0.47748190857609,0.531980459017051,0.573691930692999,0.466529870190186,0.59584658538786,0.440321610372608,0.557056876746952,0.508010953944639,0.539686480637671,0.473039387315913,0.472415906788422,0.463560973580107,0.568092181008239,0.557395420552175,0.474136372040795,0.474144729144729,0.495160184156937],"auroc_std":[0.100956965416264,0.161339627092079,0.119132601266452,0.104906537563257,0.15287129099565,0.139932335056921,0.0489819885096801,0.163731646867348,0.0794597305158775,0.0705292861471277,0.102485862318519,0.077716629178135,0.0853867020671681,0.17144210801411,0.0323168963420378,0.117971319864183,0.25180454857259,0.111730802608901,0.0564811424681659,0.0518299083433055,0.0969272657974221,0.0669673500469899,0.0792408509165697,0.132209299059763,0.108656413376346,0.234031239110204,0.119262694234436,0.0667041356510829,0.143639870628821,0.093912675068671,0.111842399820334,0.134502589844645,0.0969685172007433,0.0774265554443539,0.0591568181880591,0.0678334347488895,0.0916315536289968,0.101523029625829,0.112386382069734,0.080315904647207,0.156717861838795,0.150081193719091,0.0720146897667674,0.184288387618551,0.0966484018215973,0.0721974026015021,0.0615621126263394,0.029784621666142,0.089063673604406,0.07649880328285,0.15079295411629,0.0723293143203977,0.0678277685621408,0.091935328679265],"ap_mean":[0.767961244218169,0.603337749876643,0.622506600247899,0.759139394286098,0.812863642360225,0.445748724199113,0.634834821337637,0.0420586613184119,0.645678455777865,0.735847102681933,0.572008859203719,0.610173019496851,0.682980468220691,0.82413997196233,0.305878305757579,0.497840822056179,0.0264278947022677,0.590181587825962,0.628902745878128,0.470535647476394,0.468588345498987,0.505042941765729,0.762216675399668,0.259364356410526,0.448464136384145,0.0654045263752848,0.53392024797894,0.775925157102315,0.612797451168539,0.611530364069122,0.790817546605067,0.804548589966934,0.442200690726432,0.637711652893858,0.0360291941568112,0.654711764154097,0.758333458437141,0.510976732380701,0.570242442104263,0.663063592323799,0.778059700061115,0.356019469703112,0.512433085440304,0.0330736251378263,0.603362781896715,0.636247210271934,0.465985490707963,0.480223571989686,0.494415831777981,0.761979151774326,0.241641784349725,0.43636450506465,0.0376349864976542,0.541716038479117],"f1_mean":[0.589638718024626,0.428200836201238,0.518058029189969,0.515115821021412,0.431703732692775,0.44672192806067,0.570006912571757,0.0128103277060576,0.516634428783957,0.527776233436307,0.410155313586268,0.565520892439555,0.473128178632189,0.666888846159124,0.335371774627358,0.416842001323357,0.0175768989328311,0.485073309541597,0.483976768764256,0.494537629920684,0.473758746739694,0.408327056232678,0.52495382888239,0.323611930767712,0.427145492559341,0.0444444444444444,0.391681134956997,0.590269753707393,0.470572508046627,0.526361878038385,0.660589224187709,0.455262934897738,0.436537947175668,0.568777729860366,0.0221503444144954,0.524036353068611,0.3990959453996,0.239316972227805,0.426859947345348,0.493594968735225,0.608305757596357,0.284115336735809,0.349916865453836,0.0131868131868132,0.478520253037885,0.498531942498167,0.507967748917749,0.429392880284826,0.336634750003373,0.466446821026508,0.321420703168536,0.431844828606122,0,0.331116280084751],"f1_std":[0.277363442414261,0.195684553742948,0.329278069893785,0.265687834404608,0.309544860808865,0.137070955089846,0.298179402339128,0.0179999486107816,0.277385178203242,0.356387345167562,0.17633791699076,0.326767265190078,0.291967906586701,0.178618270530166,0.288952499559512,0.191752304373491,0.0245584465059869,0.300145230966411,0.279150697957803,0.268107750154823,0.137181210913857,0.119024368606178,0.297528953904377,0.187633521091321,0.185416980250968,0.0769800358919501,0.275911315589379,0.29633586032742,0.203565510089589,0.321403213392721,0.119742572678173,0.302231101971998,0.124208447962758,0.292468869358257,0.0209907163301214,0.278133309063902,0.367129025106047,0.235118486728711,0.245164232573195,0.245573591998828,0.319208102640697,0.313906798866074,0.241130973926415,0.0294866106923049,0.154117014537298,0.283517312737763,0.272983124733325,0.188390223214446,0.140512569893705,0.271974594850974,0.199260141889074,0.200743381418225,0,0.236898501531075]},"columns":[{"id":"arm","name":"Arm","type":"character","maxWidth":90},{"id":"threshold","name":"Thr","type":"character","maxWidth":70},{"id":"symptom","name":"Symptom","type":"character","minWidth":150},{"id":"auroc_mean","name":"AUROC","type":"numeric","format":{"cell":{"digits":3},"aggregated":{"digits":3}},"style":[{"background":"rgb(255, 250, 250)"},{"background":"rgb(244, 255, 244)"},{"background":"rgb(255, 236, 236)"},{"background":"rgb(236, 255, 236)"},{"background":"rgb(255, 232, 232)"},{"background":"rgb(246, 255, 246)"},{"background":"rgb(247, 255, 247)"},{"background":"rgb(255, 222, 222)"},{"background":"rgb(255, 239, 239)"},{"background":"rgb(232, 255, 232)"},{"background":"rgb(238, 255, 238)"},{"background":"rgb(233, 255, 233)"},{"background":"rgb(235, 255, 235)"},{"background":"rgb(245, 255, 245)"},{"background":"rgb(255, 249, 249)"},{"background":"rgb(255, 232, 232)"},{"background":"rgb(255, 249, 249)"},{"background":"rgb(255, 240, 240)"},{"background":"rgb(247, 255, 247)"},{"background":"rgb(255, 253, 253)"},{"background":"rgb(255, 245, 245)"},{"background":"rgb(255, 250, 250)"},{"background":"rgb(244, 255, 244)"},{"background":"rgb(238, 255, 238)"},{"background":"rgb(255, 251, 251)"},{"background":"rgb(223, 255, 223)"},{"background":"rgb(255, 252, 252)"},{"background":"rgb(250, 255, 250)"},{"background":"rgb(238, 255, 238)"},{"background":"rgb(255, 232, 232)"},{"background":"rgb(227, 255, 227)"},{"background":"rgb(255, 246, 246)"},{"background":"rgb(243, 255, 243)"},{"background":"rgb(249, 255, 249)"},{"background":"rgb(255, 212, 212)"},{"background":"rgb(255, 241, 241)"},{"background":"rgb(230, 255, 230)"},{"background":"rgb(255, 249, 249)"},{"background":"rgb(247, 255, 247)"},{"background":"rgb(237, 255, 237)"},{"background":"rgb(255, 246, 246)"},{"background":"rgb(231, 255, 231)"},{"background":"rgb(255, 240, 240)"},{"background":"rgb(241, 255, 241)"},{"background":"rgb(253, 255, 253)"},{"background":"rgb(245, 255, 245)"},{"background":"rgb(255, 248, 248)"},{"background":"rgb(255, 248, 248)"},{"background":"rgb(255, 246, 246)"},{"background":"rgb(238, 255, 238)"},{"background":"rgb(241, 255, 241)"},{"background":"rgb(255, 248, 248)"},{"background":"rgb(255, 248, 248)"},{"background":"rgb(255, 253, 253)"}]},{"id":"auroc_std","name":"AUROC sd","type":"numeric","format":{"cell":{"digits":3},"aggregated":{"digits":3}}},{"id":"ap_mean","name":"Avg. prec.","type":"numeric","format":{"cell":{"digits":3},"aggregated":{"digits":3}}},{"id":"f1_mean","name":"F1","type":"numeric","format":{"cell":{"digits":3},"aggregated":{"digits":3}}},{"id":"f1_std","name":"F1 sd","type":"numeric","format":{"cell":{"digits":3},"aggregated":{"digits":3}}}],"filterable":true,"searchable":true,"defaultPageSize":15,"striped":true,"dataKey":"91da67b3e256bb05a8211c1e07b4c2e9"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Optimal decision thresholds (per symptom, all conditions)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>F1-optimal probability cutoff per symptom, from out-of-fold predictions. Extreme values (near 0 or 1), especially for rare symptoms, are fragile and may not transfer.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="reactable html-widget html-fill-item" id="htmlwidget-693a148afed63b877259" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-693a148afed63b877259">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"arm":["denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","denoised","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original","original"],"threshold":["27","27","27","27","27","27","27","27","27","37","37","37","37","37","37","37","37","37","50","50","50","50","50","50","50","50","50","27","27","27","27","27","27","27","27","27","37","37","37","37","37","37","37","37","37","50","50","50","50","50","50","50","50","50"],"symptom":["Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness","Anhedonia","Appetite changes","Concentration","Depressed mood","Fatigue","Psychomotor","Sleep disturbance","Suicidality","Worthlessness"],"f1_optimal_threshold":[0.10775437951088,0.293190628290176,0.118254274129868,0.162479788064957,0.195359632372856,0.466625213623047,0.322113782167435,0.0709484741091728,0.118059910833836,0.356658935546875,0.440863102674484,0.457432806491852,0.37605881690979,0.265219122171402,0.467454046010971,0.335419535636902,0.479776948690414,0.31708961725235,0.316626101732254,0.482739448547363,0.184408664703369,0.352524876594543,0.347156584262848,0.506085693836212,0.448314100503922,0.557306170463562,0.311325162649155,0.0802140906453133,0.351458072662354,0.112895391881466,0.13649295270443,0.184957921504974,0.459383726119995,0.336474567651749,0.00502886017784476,0.127557754516602,0.353516310453415,0.405165821313858,0.44505763053894,0.358622908592224,0.233975201845169,0.435472875833511,0.351017892360687,0.482964366674423,0.312019795179367,0.363529026508331,0.477693766355515,0.296039015054703,0.449495911598206,0.373093008995056,0.516539573669434,0.444679856300354,0.159192815423012,0.335565894842148]},"columns":[{"id":"arm","name":"Arm","type":"character","maxWidth":90},{"id":"threshold","name":"Thr","type":"character","maxWidth":70},{"id":"symptom","name":"Symptom","type":"character","minWidth":150},{"id":"f1_optimal_threshold","name":"F1-optimal cutoff","type":"numeric","format":{"cell":{"digits":3},"aggregated":{"digits":3}}}],"filterable":true,"searchable":true,"defaultPageSize":15,"striped":true,"dataKey":"9be9bf53c8e2d2bf3e4efe28a76ef373"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Selected hyperparameters (most-frequent config per condition)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The configuration chosen most often across the 5 outer folds, with how many of the 5 folds chose it. Lower frequency (e.g.&nbsp;2/5) signals the inner loop was indecisive — usually a sign of weak/noisy signal.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="reactable html-widget html-fill-item" id="htmlwidget-45cee094f564adb2641b" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-45cee094f564adb2641b">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"arm":["denoised","denoised","denoised","original","original","original"],"threshold":["27","37","50","27","37","50"],"modal_config":["(256, 64) | 0.5 | 3e-04 | 1e-04","(128, 64) | 0.3 | 3e-04 | 1e-04","(256, 64) | 0.3 | 3e-04 | 1e-04","(256, 64) | 0.5 | 3e-04 | 1e-04","(128, 64) | 0.3 | 3e-04 | 1e-04","(256, 64) | 0.3 | 3e-04 | 1e-04"],"frequency":["2/5","2/5","2/5","2/5","2/5","2/5"]},"columns":[{"id":"arm","name":"Arm","type":"character","maxWidth":100},{"id":"threshold","name":"Threshold","type":"character","maxWidth":100},{"id":"modal_config","name":"Most-frequent config (hidden | dropout | lr | wd)","type":"character","minWidth":300},{"id":"frequency","name":"Folds agreeing","type":"character","maxWidth":130}],"filterable":true,"defaultPageSize":6,"striped":true,"dataKey":"1eaca039e1fb988d122795ae7227161a"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<section id="results-summary" class="level2">
+<h2 class="anchored" data-anchor-id="results-summary">Results Summary</h2>
+<ul>
+<li><p>AUROC for all symptoms are ~ 0.5 indicating that the models’ predictive ability is <strong>no better than chance.</strong></p></li>
+<li><p><span class="highlight2">Prediction is especially bad for suicidality.</span> With F1 = 0, no signal from speech embeddings are reliably predictive of suicidal ideation.</p></li>
+<li><p>Lower thresholds of 27/37 were modestly better and stable than threshold 50.</p></li>
+<li><p>Loss curves show model is <span class="highlight2">over-fitting</span> to the data and memorizes participants rather than learning from the data.</p></li>
+<li><p><span class="highlight2">De-noising audio did not improve predictions.</span></p></li>
+</ul>
+</section>
+</section>
+<section id="next-steps" class="level1">
+<h1>Next Steps</h1>
+<ul>
+<li><p>Using all embeddings instead of mean-pooling.</p></li>
+<li><p>Re-aligning mismatched recording/EMAs to increase sample size.</p></li>
+<li><p>Use alternative models besides Whisper to extract embeddings. For example, wav2vec is a speech-emotion recognition model, which might make it more appropriate in the mental health setting.</p></li>
+</ul>
+</section>
+<section id="demonstration" class="level1">
+<h1>Demonstration</h1>
+<p>An HTML-based Streamlit web app was developed to demonstrate the model’s predictions on new audio recordings. Users can upload any audio file and choose which model to run (thresholds at 27, 37, or 50). Both raw and denoised audios are tested. Users can download the predicted probabilities as a .csv file.</p>
+<p>Prior to running the app, create a conda environment in DartFS using the <code>environment.yaml</code> file. Copy over the <code>app.py</code> file and <code>results/models/</code> directory to your DartFS. The <code>results/models/</code> directory contains the final models that Streamlit uses for generating the app.</p>
+<p>To run, use the following commands in DartFS:</p>
+<ul>
+<li><code>cd speech_depression/</code>
+<ul>
+<li>Or wherever you copied the <code>app.py</code> file and <code>results/models/</code> directory in your DartFS</li>
+</ul></li>
+<li><code>conda activate speech_depression</code></li>
+<li><code>python -c "from denoiser import pretrained; pretrained.dns64()"</code></li>
+<li><code>streamlit run app.py -- --models_dir results/models/</code></li>
+<li><span class="highlight">Take note of the local URL from Streamlit and the port number.</span></li>
+</ul>
+<p>Then, open another terminal on your local device: - <code>ssh -N -L 8501:localhost:8501 f0069vn@polaris.dartmouth.edu</code> - Replace 8501 with the port number from the previous step if it is different. - Copy and paste the local URL from the previous step into your web browser to access the app. - Wait a few seconds for the app to load and then follow the instructions to get predictions on your audio file.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
